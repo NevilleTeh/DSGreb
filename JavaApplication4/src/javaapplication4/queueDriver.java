@@ -18,105 +18,129 @@ import java.util.Date;
  */
 public class queueDriver {
     
-    //Create variable needed in a driver
     Queue<String> qName = new Queue<>();
+    //Queue<Integer> qId = new Queue<>();
     Queue<String> qStatus = new Queue<>();
     Queue<Integer> qCapacity = new Queue<>();
     Queue<String> qLocation = new Queue<>();
     Queue<String> qArrivalTime = new Queue<>();
     Queue<String> qPickupTime = new Queue<>();
-    Queue<ArrayList<Double>> qReputation = new Queue<>();
+    Queue<Double> qReputation = new Queue<>();
     Queue<String> qCustomer = new Queue<>();
-    Queue<String> qComment = new Queue<>();
-    
-    
     String[] status = {"not available","available"};
     
     
-    //Create driver if driver is entered
+    
     public void add(String[] a){
+        
         qName.enqueue(a[0]);  
+        
         qCapacity.enqueue(Integer.parseInt(a[1]));
-        qLocation.enqueue(a[2]+ " "+a[3]);      
-        qCustomer.enqueue("-");
-        qArrivalTime.enqueue("");
-        qPickupTime.enqueue("");
+        qLocation.enqueue(a[2]+ " "+a[3]);
+        //qId.enqueue(++sizeId);
+        DecimalFormat df = new DecimalFormat("#.#");
+
+        int range = 5 - 1 + 1;
+
+        qReputation.enqueue(Double.valueOf((df.format((Math.random() * range) + 1))));
         addAdditional();
+        qCustomer.enqueue("-");
         
     }
-     
+    
+    
+    
     public void addAdditional(){
+      
+        
         qStatus.enqueue(status[1]);
-        qReputation.enqueue(new ArrayList<>());
-     
+        double rep = (double)Math.random()*5;
+        qReputation.enqueue(rep);
+        
     }
+
+
+
     
-    
-    
-    // Calculate the arrival time of the customer to the destination
     public String arrivalTime(String time, double weightDriverSource, double weightSourceDestination){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         LocalTime lt = LocalTime.parse(time);
         
-        // Let say if 1 km need 1 minutes in real life
-        int minute = 0;
+        // If 1 km need 1 minutes in real life, then 1 km uses one second in this application
+        int second = 0;
         for(int i = 0 ; i < weightDriverSource ; i++){
-            minute++;
+            second++;
         }
         for(int i = 0 ; i< weightSourceDestination ; i++){
-            minute++;
+            second++;
         }
-       
-        return formatter.format(lt.plusMinutes(minute));
-        
+
+        return formatter.format(lt.plusMinutes(second));
+
         
     }
     
-    // Calculate the pickup up time for the driver to pick up the driver
     public String pickupTime(String time, double weightDriverSource){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         LocalTime lt = LocalTime.parse(time);
         
-        int minutes = 0;
+        int second = 0;
         for(int i = 0 ; i < weightDriverSource ; i++){
-            minutes++;
+            second++;
         }
         
-        return formatter.format(lt.plusMinutes(minutes));
+        return formatter.format(lt.plusMinutes(second));
         
     }
     
     
     
-    //Update the customer in the driver if the driver is responsible for the customer
     public void customer(String customerName, int index){
         qCustomer.set(index, customerName);
         qStatus.set(index, status[0]);
     }
      
     
-    // Display the name status capacity location and customer of driver
-    public void display(){      
+    public void display(){
+        
+          
         for(int i = 0 ; i < qName.getSize() ; i++){
-           System.out.printf("%8s %20s %12d %25s  %15s \n",qName.getElement(i),qStatus.getElement(i),qCapacity.getElement(i), qLocation.getElement(i),qCustomer.getElement(i));           
+           System.out.printf("%8s %20s %12d %22s  %18s \n",qName.getElement(i),qStatus.getElement(i),qCapacity.getElement(i), qLocation.getElement(i),qCustomer.getElement(i));
+            
         } 
         
     }
-    
-    // Display the driver availability for the customer
-    public void displayDriverAva(){    
+
+    public boolean select(String drivername){
         for(int i = 0 ; i < qName.getSize() ; i++){
-            // If the driver is not available, need not display
+            if(qName.getElement(i).equals(drivername))
+            {
+
+                return true;
+            }
+
+        }
+        return false;
+
+
+    }
+
+    public void displayDriverAva(){
+     
+        for(int i = 0 ; i < qName.getSize() ; i++){
            if(qStatus.getElement(i).equalsIgnoreCase("not available")){
                continue;
            }
-           System.out.printf("%8s %15s %20s %25s %s  \n",qName.getElement(i),qCapacity.getElement(i), qArrivalTime.getElement(i),qReputation.getElement(i),"/5.0");
+           System.out.printf("%8s %15s %20s %25.1f  %s  \n",qName.getElement(i),qCapacity.getElement(i), qArrivalTime.getElement(i),qReputation.getElement(i),"/5.0");
             
         }
+         //for(int i = 0 ; i < qName.getSize() ; i++){
+           //System.out.printf("%8s %18s %15d %25s  %15s \n",qName.getElement(i),"status ",qCapacity.getElement(i), qLocation.getElement(i),"Customer");
+            
+        //} 
         
     }
     
-    //Disaply the driver availability 
     public void displayDriver(LocalDateTime current){
         Date date = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
@@ -135,12 +159,13 @@ public class queueDriver {
 
     }
     
-    // Delete driver
     public void delete(String a){
+        //int size = qName.getSize();
         for(int i = 0 ; i < qName.getSize() ; i++){
             if(a.equalsIgnoreCase(qName.getElement(i))){
          
                 qName.remove(i);
+                //qId.remove(i);
                 qStatus.remove(i);
                 qCapacity.remove(i);
                 qLocation.remove(i);
@@ -152,5 +177,4 @@ public class queueDriver {
             
         }
     }
-    
 }
