@@ -11,19 +11,21 @@ package javaapplication4;
 public class Driver {
     
     private String name;
-    private int ID;
     private int capacity;
-    private String location;
+    private String latitudeDriver;
+    private String longtitudeDriver;
 
     public Driver() {
     }
 
-    public Driver(String name, int capacity, String location) {
+    public Driver(String name, int capacity, String latitudeDriver, String longtitudeDriver) {
         this.name = name;
         this.capacity = capacity;
-        this.location = location;
-        
+        this.latitudeDriver = latitudeDriver;
+        this.longtitudeDriver = longtitudeDriver;
     }
+
+   
 
     public String getName() {
         return name;
@@ -41,13 +43,22 @@ public class Driver {
         this.capacity = capacity;
     }
 
-    public String getLocation() {
-        return location;
+    public String getLatitudeDriver() {
+        return latitudeDriver;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setLatitudeDriver(String latitudeDriver) {
+        this.latitudeDriver = latitudeDriver;
     }
+
+    public String getLongtitudeDriver() {
+        return longtitudeDriver;
+    }
+
+    public void setLongtitudeDriver(String longtitudeDriver) {
+        this.longtitudeDriver = longtitudeDriver;
+    }
+
     
     
     

@@ -9,11 +9,7 @@ package javaapplication4;
  * @author hongjun
  */
 public class Customer {
-    
-   
-    
-    
-    
+ 
     private String customerName;
     private String arrivalTime;
     private int capacity;

@@ -4,6 +4,7 @@
  */
 package javaapplication4;
 
+import java.sql.DriverManager;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -11,6 +12,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Scanner;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import java.sql.*;
+import java.util.Vector;
+
 
 
 /**
@@ -23,15 +28,17 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws ParseException {
-        
+
+        TestAddCustomer t = new TestAddCustomer();
+        t.setVisible(true);
         
         Scanner scan = new Scanner(System.in);
         Scanner scan2 = new Scanner(System.in);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");  
         LocalDateTime current = LocalDateTime.now(); 
         Graph<String,Double> g = new Graph<>();
-        
-       
+      
+         
         customerView view = new customerView();
         queueCustomer queueCustomer = new queueCustomer();
         queueDriver queueDriver = new queueDriver();
@@ -53,7 +60,7 @@ public class Main {
 
         
         
-        
+        //new TestHomepage().setVisible(true);
         
         
 
@@ -179,8 +186,6 @@ public class Main {
                          Date date = new Date();
                          SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
                            
-                         
-                       
                          String choosen = view.display();
                          if(choosen.equalsIgnoreCase("exit")){
                             break;
@@ -202,33 +207,17 @@ public class Main {
                              
                              queueCustomer.add(inputCustomerBreak);
                              
-//                             // Check if the customer name entered existed or not
-//                             boolean check = true;
-//                             while(check){      
-//                                for(int i = 0 ; i < queueCustomer.qName.getSize(); i ++){
-//                                    if(inputCustomerBreak[0].equalsIgnoreCase(queueCustomer.qName.getElement(i))){
-//                                        System.out.println("Customer name already exists, Please choose the other name: ");
-//                                        System.out.print(">>");
-//                                        inputCustomerBreak[0] = scan.nextLine();
-//                                        queueCustomer.qName.set(i, inputCustomerBreak[0]);
-//                                        
-//                                        break;
-//                                        
-//                                    }
-//                                    else{
-//                                        check = false;
-//                                        break;
-//                                    }
-//                                    
-//                                }
-//                            }
-         
-                            
-                             
-                             
                              listPickedCustomer.add(queueCustomer.qName.getIndex(inputCustomerBreak[0]));
                              
                              
+                             
+                             // Add customer data into database
+                             customerDB(inputCustomerBreak[0], inputCustomerBreak[1], 
+                                        inputCustomerBreak[2], inputCustomerBreak[3], 
+                                        inputCustomerBreak[4], inputCustomerBreak[5], 
+                                        inputCustomerBreak[6]);
+                             
+
                              String starting = inputCustomerBreak[3]+" "+ inputCustomerBreak[4];
                              String destination = inputCustomerBreak[5]+" "+ inputCustomerBreak[6];
                              double startingLa = Double.parseDouble(inputCustomerBreak[3]);
@@ -384,7 +373,7 @@ public class Main {
                              queueDriver.add(inputDriverBreak);
                              g.addVertex(inputDriverBreak[2] +" "+ inputDriverBreak[3]);
                              
-                             
+                             driverDB(inputDriverBreak[0], inputDriverBreak[1], inputDriverBreak[2],inputDriverBreak[3]);
                              System.out.println("Driver is successfully registered!");
                              break;
                          }
@@ -452,7 +441,6 @@ public class Main {
         // Return the result in km which will be used to add weight to the edge
         return result * radius;
         
-        
     }
     
     public static void calculateRating(ArrayList<Double> q){
@@ -476,6 +464,161 @@ public class Main {
             q.add(list.get(0));
         
     }
+    
+    // Insert custoemr data into database
+    public static void customerDB(String name, String arrivalTime, String capacity, String startla, String startlo, String destla, String destlo){
+        try{     
+                String url = "jdbc:mysql://localhost:3306/grab?user=root&password=steadybombibi";
+                Connection sqlConn = null;
+                PreparedStatement pst = null;
+                ResultSet rs = null;
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                sqlConn = DriverManager.getConnection(url);
+                
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                sqlConn = DriverManager.getConnection(url);
+                
+                pst = sqlConn.prepareStatement("insert into grab.customer(customerName,arrivalTime,capacity,startLa,startLo,destLa,destLo)value(?,?,?,?,?,?,?)");
+                
+                    pst.setString(1, name);
+                    pst.setString(2, arrivalTime);
+                    pst.setString(3, capacity);
+                    pst.setString(4, startla);
+                    pst.setString(5, startlo);
+                    pst.setString(6, destla);
+                    pst.setString(7, destlo);
+                
+                    pst.executeUpdate();
+                    
+                    updateCustomerDB();
+                
+                
+       }catch(Exception e){
+           JOptionPane.showMessageDialog(null,e.getMessage());
+       }
+    }
+    
+    // Update customer database
+    public static void updateCustomerDB(){
+        try{     
+                String url = "jdbc:mysql://localhost:3306/grab?user=root&password=steadybombibi";
+                Connection sqlConn = null;
+                PreparedStatement pst = null;
+                ResultSet rs = null;
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                sqlConn = DriverManager.getConnection(url);
+                
+               
+                
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                sqlConn = DriverManager.getConnection(url);
+                pst = sqlConn.prepareStatement("select * from Grab.customer");
+                
+                rs = pst.executeQuery();
+                ResultSetMetaData stData = rs.getMetaData();
+                
+                int q = stData.getColumnCount();
+                
+               
+                
+                
+                while(rs.next()){
+                    Vector columnData = new Vector();
+                    
+                    for(int i = 1 ; i <= q ; i++ ){
+                        columnData.add(rs.getString("customerName"));
+                        columnData.add(rs.getString("arrivalTime"));
+                        columnData.add(rs.getString("capacity"));
+                        columnData.add(rs.getString("startLa"));
+                        columnData.add(rs.getString("startLo"));
+                        columnData.add(rs.getString("DestLa"));
+                        columnData.add(rs.getString("DestLo"));
+                        
+                        
+                    }
+                   
+                }
+                
+                
+       }catch(Exception e){
+            System.out.println(e.getMessage());
+       }
+        
+    }
+    
+    public static void driverDB(String name, String capacity, String latitudeDriver, String longtitudeDriver){
+        
+        try{     
+                String url = "jdbc:mysql://localhost:3306/grab?user=root&password=steadybombibi";
+                Connection sqlConn = null;
+                PreparedStatement pst = null;
+                ResultSet rs = null;
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                sqlConn = DriverManager.getConnection(url);
+                
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                sqlConn = DriverManager.getConnection(url);
+                
+                pst = sqlConn.prepareStatement("insert into grab.driver(name,capacity,latitudeDriver,longtitudeDriver)value(?,?,?,?)");
+                
+                    pst.setString(1, name);
+                    pst.setString(2, capacity);
+                    pst.setString(3, latitudeDriver);
+                    pst.setString(4, longtitudeDriver);
+                    
+                
+                    pst.executeUpdate();
+                    
+                    updateDriverDB();
+                
+                
+       }catch(Exception e){
+           JOptionPane.showMessageDialog(null,e.getMessage());
+       }
+    }
+    
+       // Update driver database
+       public static void updateDriverDB(){
+        try{     
+                String url = "jdbc:mysql://localhost:3306/grab?user=root&password=steadybombibi";
+                Connection sqlConn = null;
+                PreparedStatement pst = null;
+                ResultSet rs = null;
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                sqlConn = DriverManager.getConnection(url);
+                
+               
+                
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                sqlConn = DriverManager.getConnection(url);
+                pst = sqlConn.prepareStatement("select * from Grab.driver");
+                
+                rs = pst.executeQuery();
+                ResultSetMetaData stData = rs.getMetaData();
+                
+                int q = stData.getColumnCount();
+
+                
+                while(rs.next()){
+                    Vector columnData = new Vector();
+                    
+                    for(int i = 1 ; i <= q ; i++ ){
+                        columnData.add(rs.getString("name"));
+                        columnData.add(rs.getString("capacity"));
+                        columnData.add(rs.getString("latitudeDriver"));
+                        columnData.add(rs.getString("latitudeDriver"));
+                    
+                    }
+                   
+                }
+                
+                
+       }catch(Exception e){
+            System.out.println(e.getMessage());
+       }
+        
+    }
+    
     
     
  
